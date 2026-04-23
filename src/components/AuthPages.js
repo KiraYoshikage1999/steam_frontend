@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { authMethods } from '../Functional/Auth/authMethods';
 
 export default function AuthPages() {
   const [currentPage, setCurrentPage] = useState('menu'); // 'menu', 'login', 'register', 'profile'
@@ -43,11 +44,16 @@ function AuthMenu({ onNavigate }) {
 function LoginPage({ onBack }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    // TODO: implement login functionality
-    console.log('Login attempt:', { email, password });
+    setError('');
+    try {
+      await authMethods.login(email, password);
+    } catch (err) {
+      setError(err?.message || 'Ошибка входа');
+    }
   };
 
   return (
@@ -79,6 +85,7 @@ function LoginPage({ onBack }) {
             />
           </div>
           <button type="submit" className="btn-submit">Войти</button>
+          {error ? <div className="auth-error">{error}</div> : null}
         </form>
       </div>
     </div>
@@ -90,11 +97,21 @@ function RegisterPage({ onBack }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [error, setError] = useState('');
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    // TODO: implement register functionality
-    console.log('Register attempt:', { email, username, password, passwordConfirm });
+    if (password !== passwordConfirm) {
+      setError('Пароли не совпадают');
+      return;
+    }
+
+    setError('');
+    try {
+      await authMethods.register(username, email, password);
+    } catch (err) {
+      setError(err?.message || 'Ошибка регистрации');
+    }
   };
 
   return (
@@ -148,6 +165,7 @@ function RegisterPage({ onBack }) {
             />
           </div>
           <button type="submit" className="btn-submit">Зарегистрироваться</button>
+          {error ? <div className="auth-error">{error}</div> : null}
         </form>
       </div>
     </div>

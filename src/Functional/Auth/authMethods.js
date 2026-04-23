@@ -5,15 +5,49 @@ export const authMethods = {
   // Register a new user
   async register(username, email, password) {
     try {
-      const request = await fetch('https://localhost:7219/api/Auth/register', {
+      const payload = {
+        // common variants for ASP.NET / DTO naming
+        username,
+        userName: username,
+        email,
+        password,
+        // common "confirm password" variants (extra fields are ignored by most servers)
+        passwordConfirm: password,
+        confirmPassword: password,
+        passwordConfirmation: password,
+      };
+
+      const response = await fetch('https://localhost:7219/api/Auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify(payload),
       });
-      // return await response.json();
-      console.log('Register method called:', { username, email, password });
+
+      const text = await response.text().catch(() => '');
+      let data = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = text || null;
+      }
+
+      if (!response.ok) {
+        const message =
+          (data && (data.message || data.title || data.error || data.errors)) ||
+          (typeof data === 'string' ? data : null) ||
+          `Register failed (${response.status})`;
+
+        console.error('Register failed:', response.status, data);
+        throw new Error(
+          typeof message === 'string' ? message : `Register failed (${response.status})`
+        );
+      }
+
+      console.log('Register success:', data);
+      return data;
     } catch (error) {
       console.error('Register error:', error);
+      throw error;
     }
   },
 
