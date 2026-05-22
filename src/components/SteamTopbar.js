@@ -1,42 +1,111 @@
-export default function SteamTopbar({ onAuthClick }) {
+import React, { useState } from 'react';
+import CategoryDropdown from './CategoryDropdown';
+
+export default function SteamTopbar({
+  onAuthClick,
+  onHomeClick,
+  onLibraryClick,
+  onWishListClick,
+  onCartClick,
+  cartCount,
+  user,
+  activePage,
+  categories,
+  onCategorySelect,
+}) {
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const notifications = [];
+
+  const avatarUrl = user?.IconUrl || user?.iconUrl || user?.icon?.url || user?.Avatar || user?.avatarUrl || '';
+  const displayName = user?.UserName || user?.username || user?.userName || user?.name || user?.email || 'Профиль';
+
+  // Структура категорий по умолчанию, если не передана
+  const categoryMenu = categories || [
+    { title: 'Жанры', items: [] },
+  ];
+
   return (
     <div className="steam-navbar">
       <div className="steam-topbar">
-        <div className="steam-brand">
+        <button
+          type="button"
+          className="steam-brand"
+          onClick={onHomeClick}
+          aria-label="На главную"
+        >
           <div className="steam-logo-mark">S</div>
-          <div className="steam-logo-text">STEAM</div>
-        </div>
+          <div className="steam-logo-text">Stish</div>
+        </button>
 
         <div className="steam-header-links">
-          <a href="#" className="active">Магазин</a>
-          <a href="#">Сообщество</a>
-          <a href="#">О сервисе</a>
-          <a href="#">Чат</a>
-          <a href="#">Поддержка</a>
+          <button
+            type="button"
+            className={`nav-link ${activePage === 'home' ? 'active' : ''}`}
+            onClick={onHomeClick}
+          >
+            Магазин
+          </button>
+          <button
+            type="button"
+            className={`nav-link ${activePage === 'library' ? 'active' : ''}`}
+            onClick={onLibraryClick}
+          >
+            Библиотека
+          </button>
         </div>
 
         <div className="steam-user-actions">
-          <button className="steam-btn secondary">Установить Steam</button>
-          <button className="steam-icon-btn" aria-label="Уведомления">🔔</button>
-          <div className="steam-wallet">98,64€</div>
-          <button className="steam-user-btn" onClick={onAuthClick}>👤 Профиль ▾</button>
+          <button className="steam-cart-btn" onClick={onCartClick} type="button" aria-label="Корзина">
+            🛒{cartCount ? ` ${cartCount}` : ''}
+          </button>
+          <div className="notification-wrapper">
+            <button
+              className="steam-icon-btn"
+              aria-label="Уведомления"
+              onClick={() => setNotificationsOpen((value) => !value)}
+              type="button"
+            >
+              🔔
+            </button>
+            {notificationsOpen && (
+              <div className="notification-panel">
+                {notifications.length === 0 ? (
+                  <div className="notification-empty">никаких сообщений нет</div>
+                ) : (
+                  notifications.map((note, index) => (
+                    <div className="notification-item" key={index}>
+                      <div className="notification-item-title">{note.title}</div>
+                      <div className="notification-item-body">{note.body}</div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+          <button className="steam-user-btn" onClick={onAuthClick} type="button">
+            {avatarUrl ? <img className="steam-user-avatar" src={avatarUrl} alt={displayName} /> : '👤'}
+            {displayName} ▾
+          </button>
         </div>
       </div>
 
       <div className="steam-subnav">
         <div className="steam-subnav-links">
-          <a href="#">Просмотр ▾</a>
-          <a href="#">Рекомендации ▾</a>
-          <a href="#">Категории ▾</a>
-          <a href="#">Способы игры ▾</a>
-          <a href="#">Особые разделы ▾</a>
+          {categoryMenu.map((category, index) => (
+            <CategoryDropdown
+              key={category?.title || index}
+              title={category.title}
+              items={category.items}
+              onSelectItem={(item) => onCategorySelect && onCategorySelect(category.title, item)}
+            />
+          ))}
         </div>
         <div className="steam-subnav-actions">
           <div className="steam-search-box">
             <input type="text" placeholder="Поиск по магазину" />
-            <button>🔍</button>
+            <button type="button">🔍</button>
           </div>
-          <button className="steam-wishlist">★ Список желаемого 9</button>
+          <button className="steam-wishlist" onClick={onWishListClick} type="button">★ Список желаемого</button>
         </div>
       </div>
     </div>

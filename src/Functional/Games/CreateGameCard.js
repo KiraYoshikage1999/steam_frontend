@@ -1,7 +1,9 @@
 import React from 'react';
+import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 
 export default function CreateGameCard({ game, onClick }) {
-  const posterUrl = game?.poster?.url || game?.images?.[0]?.url || '';
+  const posterUrlRaw = game?.poster?.url || game?.poster?.Url || game?.images?.[0]?.url || game?.images?.[0]?.Url || '';
+  const posterUrl = resolveAssetUrl(posterUrlRaw);
   const genres = Array.isArray(game?.genres)
     ? game.genres.map((genre) => genre.name).filter(Boolean).join(', ')
     : '';

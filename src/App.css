@@ -1,7 +1,7 @@
 .App {
   min-height: 100vh;
   color: #c5d1e0;
-  background: #0b121a;
+  background: linear-gradient(180deg, #070d16 0%, #0a1118 20%, #0b121a 50%, #131b29 72%, #f5f7fb 85%);
   padding: 0;
   margin: 0;
   font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -9,7 +9,11 @@
 
 body {
   margin: 0;
-  background: #0b121a;
+  background: linear-gradient(180deg, black 70%, white 30%);
+}
+
+:root {
+  --accent-red: #F64843;
 }
 
 .steam-shell {
@@ -49,24 +53,36 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f5f5f5;
 }
 
 .steam-logo-mark {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: #171f2c;
+  background: linear-gradient(135deg, #24395c 0%, #121827 100%);
   display: grid;
   place-items: center;
   font-size: 18px;
   font-weight: 800;
-  color: #7ea7ff;
+  color: #f3f7ff;
 }
 
 .steam-logo-text {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.16em;
+  color: #f5f5f5;
+}
+
+.steam-header-links button.nav-link.active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(246, 72, 67, 0.18), #0b1220 100%);
+  box-shadow: inset 0 0 0 1px rgba(246, 72, 67, 0.14);
 }
 
 .steam-header-links {
@@ -78,16 +94,31 @@ body {
   justify-content: center;
 }
 
-.steam-header-links a {
+.steam-header-links a,
+.steam-header-links button,
+.steam-header-links .nav-link {
   color: #c5d1e0;
   text-decoration: none;
   font-size: 14px;
-  transition: color .2s ease;
+  transition: color .2s ease, background .2s ease, transform .2s ease;
+  border: none;
+  background: transparent;
+  padding: 10px 18px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 600;
 }
 
-.steam-header-links a.active,
+.steam-header-links button.nav-link:hover,
 .steam-header-links a:hover {
-  color: #7ea7ff;
+  color: #eaf2ff;
+  background: rgba(46, 82, 150, 0.22);
+}
+
+.steam-header-links button.nav-link.active {
+  color: #fff;
+  background: linear-gradient(135deg, #0d2142 0%, #112d5a 100%);
+  box-shadow: inset 0 0 0 1px rgba(126, 167, 255, 0.18);
 }
 
 .steam-user-actions {
@@ -121,6 +152,53 @@ body {
   cursor: pointer;
 }
 
+.notification-wrapper {
+  position: relative;
+}
+
+.notification-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 260px;
+  max-width: 320px;
+  background: #0e1725;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.32);
+  z-index: 120;
+}
+
+.notification-empty {
+  color: #9fb0d1;
+  padding: 16px 12px;
+  text-align: center;
+}
+
+.notification-item {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  margin-bottom: 10px;
+}
+
+.notification-item:last-child {
+  margin-bottom: 0;
+}
+
+.notification-item-title {
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.notification-item-body {
+  color: #c7d4e8;
+  font-size: 13px;
+}
+
 .steam-wallet {
   color: #e6edf7;
   font-size: 14px;
@@ -138,6 +216,230 @@ body {
   padding: 10px 16px;
   font-size: 13px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.steam-user-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: #0b121a;
+}
+
+.steam-cart-btn {
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  color: #e6edf7;
+  padding: 10px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.cart-items {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 16px;
+  padding: 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+}
+
+.cart-item-cover {
+  width: 96px;
+  height: 96px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 16px;
+}
+
+.cart-item-cover-empty {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #9fb0d1;
+  background: rgba(255,255,255,0.04);
+  border-radius: 16px;
+}
+
+.cart-item-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cart-item-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #f5f7ff;
+}
+
+.cart-item-price {
+  font-size: 15px;
+  color: #a6bbd9;
+}
+
+.btn-remove {
+  align-self: flex-start;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  color: #e6edf7;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.cart-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+}
+
+.cart-summary-row {
+  display: flex;
+  justify-content: space-between;
+  color: #c5d1e0;
+}
+
+.profile-subsection-title {
+  margin-top: 18px;
+  margin-bottom: 12px;
+  color: #f5f7ff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.btn-remove-wishlist {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(246, 72, 67, 0.8);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s ease;
+  z-index: 10;
+}
+
+.btn-remove-wishlist:hover {
+  background: rgba(246, 72, 67, 1);
+}
+
+.btn-remove-wishlist:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.app-footer {
+  background: linear-gradient(180deg, #0a0f18 0%, #0d121a 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 80px;
+  padding: 60px 0 40px;
+  color: #c5d1e0;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.footer-company {
+  font-size: 22px;
+  font-weight: 800;
+  color: #f5f7ff;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, #3a6ec9 0%, #a8c9ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.footer-description {
+  font-size: 14px;
+  color: #9fb0d1;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.footer-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f5f7ff;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer-links a {
+  color: #9fb0d1;
+  text-decoration: none;
+  font-size: 13px;
+  transition: color .2s ease;
+}
+
+.footer-links a:hover {
+  color: #d4e3ff;
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  color: #7a8aa8;
+}
+
+.footer-bottom p {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .app-footer {
+    margin-top: 40px;
+    padding: 40px 0 30px;
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
 }
 
 .steam-subnav {
@@ -827,6 +1129,138 @@ body {
 .auth-page {
   min-height: 60vh;
   padding: 40px 0;
+}
+
+.profile-page .profile-shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+  padding-top: 24px;
+}
+
+.profile-sidebar {
+  background: #0f1825;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 320px;
+}
+
+.profile-sidebar-title {
+  color: #7ea7ff;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.profile-sidebar-btn {
+  border: none;
+  background: rgba(255, 255, 255, 0.04);
+  color: #c5d1e0;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background .2s ease, transform .2s ease;
+}
+
+.profile-sidebar-btn.active,
+.profile-sidebar-btn:hover {
+  background: rgba(42, 124, 219, 0.18);
+  color: #fff;
+  transform: translateX(2px);
+}
+
+.profile-content {
+  background: #0f1825;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 24px;
+  min-height: 320px;
+}
+
+.profile-section {
+  display: grid;
+  gap: 18px;
+}
+
+.profile-info-block {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 18px;
+  align-items: center;
+}
+
+.profile-avatar-preview-wrapper {
+  width: 100px;
+  height: 100px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.profile-avatar-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar-empty {
+  color: #8e9cb4;
+  font-size: 13px;
+  text-align: center;
+}
+
+.profile-summary-name {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.profile-summary-meta {
+  color: #aebbd3;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.transaction-item {
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: #dbe4ff;
+}
+
+.profile-help-text {
+  color: #8ea2c4;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.auth-success {
+  color: #8fda8f;
+  margin-top: 10px;
+}
+
+.profile-page textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  padding: 12px;
+  resize: vertical;
 }
 
 .auth-container {
