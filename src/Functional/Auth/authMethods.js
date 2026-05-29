@@ -3,6 +3,7 @@
 import log from "../../utils/Logger"
 
 const API_BASE = 'https://localhost:7219';
+//const API_BASE = 'https://26.185.217.20:7219';
 const AUTH_STORAGE_KEY = 'steam-frontend.authUser';
 //Forming for server Errors
 function formatServerError(data) {
@@ -232,6 +233,57 @@ export const authMethods = {
       return data;
     } catch (error) {
       console.error('UpdateProfile error:', error);
+      throw error;
+    }
+  },
+
+  async deleteAccount() {
+    try {
+      const response = await fetch(`${API_BASE}/api/Users/delete-account`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader(),
+        },
+      });
+
+      const data = await readResponseData(response);
+      if (!response.ok) {
+        const message = formatServerError(data) || `Delete account failed (${response.status})`;
+        console.error('DeleteAccount failed:', response.status, data);
+        throw new Error(message);
+      }
+
+      // Clear auth after successful deletion
+      saveAuth(null);
+      return data;
+    } catch (error) {
+      console.error('DeleteAccount error:', error);
+      throw error;
+    }
+  },
+
+  async refundGame(gameId) {
+    try {
+      const response = await fetch(`${API_BASE}/api/Order/refund-game`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader(),
+        },
+        body: JSON.stringify({ gameId }),
+      });
+
+      const data = await readResponseData(response);
+      if (!response.ok) {
+        const message = formatServerError(data) || `Refund game failed (${response.status})`;
+        console.error('RefundGame failed:', response.status, data);
+        throw new Error(message);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('RefundGame error:', error);
       throw error;
     }
   },

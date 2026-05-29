@@ -1,9 +1,18 @@
 import React from 'react';
-import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
+import { resolveAssetUrl, resolveGameAssetPath } from '../../utils/resolveAssetUrl';
 
 export default function CreateGameCard({ game, onClick }) {
-  const posterUrlRaw = game?.poster?.url || game?.poster?.Url || game?.images?.[0]?.url || game?.images?.[0]?.Url || '';
-  const posterUrl = resolveAssetUrl(posterUrlRaw);
+  const posterUrl = resolveAssetUrl(resolveGameAssetPath(game));
+  const rawImages = Array.isArray(game?.images ?? game?.Images) ? (game.images || game.Images) : [];
+  const galleryImages = rawImages
+    .map((item) => {
+      if (typeof item === 'string') return item;
+      if (item && typeof item === 'object') return item.url || item.Url || item.path || item.Path || '';
+      return '';
+    })
+    .filter((path) => path && resolveAssetUrl(path) !== posterUrl)
+    .map((path) => resolveAssetUrl(path));
+
   const genres = Array.isArray(game?.genres)
     ? game.genres.map((genre) => genre.name).filter(Boolean).join(', ')
     : '';
@@ -20,6 +29,18 @@ export default function CreateGameCard({ game, onClick }) {
       >
         {!posterUrl && <div className="game-card-cover-empty">Нет обложки</div>}
       </div>
+
+      {galleryImages.length > 0 && (
+        <div className="game-card-gallery">
+          {galleryImages.map((imageUrl, index) => (
+            <div
+              key={`${imageUrl}-${index}`}
+              className="game-card-gallery-item"
+              style={{ backgroundImage: `url(${imageUrl})` }}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="game-card-body">
         <div className="game-card-title-row">

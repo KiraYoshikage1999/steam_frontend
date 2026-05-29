@@ -39,6 +39,7 @@ export default function SteamPage() {
   const [user, setUser] = useState(() => loadStoredUser());
   const [cartItems, setCartItems] = useState(() => loadStoredCart());
   const [wishListGames, setWishListGames] = useState([]);
+  const [selectedGenres, setSelectedGenres] = useState([]);
   const [categories, setCategories] = useState([
     { title: 'Просмотр', items: [] },
     { title: 'Рекомендации', items: [] },
@@ -190,7 +191,8 @@ export default function SteamPage() {
     let cancelled = false;
     (async () => {
       try {
-        const resp = await fetch(`https://localhost:7219/api/WishList/get-all`);
+        // const resp = await fetch(`https://localhost:7219/api/WishList/get-all`);
+        const resp = await fetch(`https://26.185.217.20:7219/api/WishList/get-all`);
         const json = await resp.json().catch(() => null);
         if (resp.ok) {
           const data = Array.isArray(json) ? json : json?.data || json?.Data || [];
@@ -278,13 +280,15 @@ export default function SteamPage() {
         activePage={currentPage}
         categories={categories}
         onCategorySelect={handleCategorySelect}
+        selectedGenres={selectedGenres}
+        onGenreSelect={setSelectedGenres}
       />
       {hydrating ? null : null}
       
       {currentPage === 'home' && (
         <div className="steam-shell">
           <main className="steam-main">
-            <SteamHero onGameClick={handleGameClick} />
+            <SteamHero onGameClick={handleGameClick} selectedGenres={selectedGenres} />
           </main>
         </div>
       )}
@@ -295,6 +299,7 @@ export default function SteamPage() {
             gameId={selectedGame?.id}
             game={selectedGame}
             onBack={handleBackFromGame}
+            onGoToLibrary={handleLibraryClick}
             user={user}
             onAddToCart={handleAddToCart}
             cartItems={cartItems}

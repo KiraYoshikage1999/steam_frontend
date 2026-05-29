@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import CreateGameCard from './CreateGameCard';
 
-export function GamesFetch({ onGameClick }) {
+//const API_BASE = 'https://26.185.217.20:7219';
+const API_BASE = 'https://localhost:7219';
+
+export function GamesFetch({ onGameClick, selectedGenres = [] }) {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -9,7 +12,15 @@ export function GamesFetch({ onGameClick }) {
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const response = await fetch('https://localhost:7219/api/Game/get-all-games');
+        let url = `${API_BASE}/api/Game/get-all-games`;
+        
+        // Add genre filters to query if selected
+        if (selectedGenres && selectedGenres.length > 0) {
+          const genreParams = selectedGenres.map(id => `genreIds=${id}`).join('&');
+          url += `?${genreParams}`;
+        }
+        
+        const response = await fetch(url);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -25,7 +36,7 @@ export function GamesFetch({ onGameClick }) {
     };
 
     fetchGames();
-  }, []);
+  }, [selectedGenres]);
 
   if (loading) {
     return <div className="games-loading">Загрузка игр...</div>;

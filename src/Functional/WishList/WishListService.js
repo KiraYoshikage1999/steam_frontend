@@ -1,7 +1,8 @@
 import log from '../../utils/Logger';
 import { authMethods } from '../Auth/authMethods';
 
-const API_BASE = 'https://localhost:7219';
+//const API_BASE = 'https://localhost:7219';
+const API_BASE = 'https://26.185.217.20:7219';
 
 function getAuthHeader() {
   log.debug('Getting Auth Header token for WishList');

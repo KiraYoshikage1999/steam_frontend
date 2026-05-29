@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import CategoryDropdown from './CategoryDropdown';
+import GenresFilter from '../Functional/Genre/GenresFilter';
 
 export default function SteamTopbar({
   onAuthClick,
@@ -12,6 +13,8 @@ export default function SteamTopbar({
   activePage,
   categories,
   onCategorySelect,
+  selectedGenres,
+  onGenreSelect,
 }) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const notifications = [];
@@ -91,14 +94,10 @@ export default function SteamTopbar({
 
       <div className="steam-subnav">
         <div className="steam-subnav-links">
-          {categoryMenu.map((category, index) => (
-            <CategoryDropdown
-              key={category?.title || index}
-              title={category.title}
-              items={category.items}
-              onSelectItem={(item) => onCategorySelect && onCategorySelect(category.title, item)}
-            />
-          ))}
+          <GenresFilter
+            selectedGenres={selectedGenres || []}
+            onGenreSelect={onGenreSelect}
+          />
         </div>
         <div className="steam-subnav-actions">
           <div className="steam-search-box">

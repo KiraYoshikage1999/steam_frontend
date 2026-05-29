@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
-import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import React, { useState, useEffect } from 'react';
+import { resolveAssetUrl, resolveGameAssetPath } from '../utils/resolveAssetUrl';
 import { addToWishList, removeFromWishList } from '../Functional/WishList/WishListService';
 
-export default function GameDetail({ gameId, game, onBack, user, onAddToCart, cartItems, wishListGames, onWishListUpdate }) {
+const API_BASE = 'https://26.185.217.20:7219';
+
+export default function GameDetail({ gameId, game, onBack, user, onAddToCart, cartItems, wishListGames, onWishListUpdate, onGoToLibrary }) {
   const [statusMessage, setStatusMessage] = useState('');
+  const [dlcs, setDlcs] = useState([]);
+  const [dlcsLoading, setDlcsLoading] = useState(true);
 
   const gameIdentifier = game?.id || game?.Id || gameId;
   const purchasedGames = Array.isArray(user?.PurchasedGames)
@@ -18,8 +22,7 @@ export default function GameDetail({ gameId, game, onBack, user, onAddToCart, ca
   const inWishList = Boolean(
     gameIdentifier && Array.isArray(wishListGames) && wishListGames.some((item) => (item?.id || item?.Id) === gameIdentifier)
   );
-  const posterUrlRaw = game?.poster?.url || game?.poster?.Url || game?.images?.[0]?.url || game?.images?.[0]?.Url || '';
-  const posterUrl = resolveAssetUrl(posterUrlRaw);
+  const posterUrl = resolveAssetUrl(resolveGameAssetPath(game));
   const genres = Array.isArray(game?.genres)
     ? game.genres.map((genre) => genre.name).filter(Boolean).join(', ')
     : '';
@@ -30,6 +33,41 @@ export default function GameDetail({ gameId, game, onBack, user, onAddToCart, ca
   const developer = game?.developer === '00000000-0000-0000-0000-000000000000'
     ? 'Unknown Developer'
     : (game?.developer || 'Unknown Developer');
+
+  // Load DLCs for this game
+  useEffect(() => {
+    if (!gameIdentifier) {
+      setDlcsLoading(false);
+      return;
+    }
+
+    const fetchDlcs = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/DLC/get-all`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const dlcsArray = Array.isArray(data) ? data : (data?.data ?? []);
+        
+        // Filter DLCs that belong to this game
+        const gameDlcs = dlcsArray.filter(dlc => 
+          (dlc?.gameId || dlc?.GameId || dlc?.game?.id) === gameIdentifier &&
+          (dlc?.isDLC || dlc?.IsDLC || false)
+        );
+        
+        setDlcs(gameDlcs);
+      } catch (err) {
+        console.warn('Failed to load DLCs:', err);
+        setDlcs([]);
+      } finally {
+        setDlcsLoading(false);
+      }
+    };
+
+    fetchDlcs();
+  }, [gameIdentifier]);
 
   if (!game) {
     return (
@@ -60,6 +98,14 @@ export default function GameDetail({ gameId, game, onBack, user, onAddToCart, ca
 
     onAddToCart(game);
     setStatusMessage('Игра добавлена в корзину. Перейдите в корзину для покупки.');
+  };
+
+  const handleGoToLibrary = () => {
+    if (onGoToLibrary) {
+      onGoToLibrary();
+    } else if (onBack) {
+      onBack();
+    }
   };
 
   const handleWishListToggle = async () => {
@@ -143,6 +189,25 @@ export default function GameDetail({ gameId, game, onBack, user, onAddToCart, ca
             </div>
           </div>
 
+          {!dlcsLoading && dlcs.length > 0 && (
+            <div className="game-detail-section">
+              <h2 className="game-detail-section-title">Дополнительный контент</h2>
+              <div className="dlcs-list">
+                {dlcs.map((dlc) => (
+                  <div key={dlc?.id || dlc?.Id} className="dlc-item">
+                    <div className="dlc-info">
+                      <h3 className="dlc-name">{dlc?.name || dlc?.Name || 'DLC'}</h3>
+                      {dlc?.description && <p className="dlc-description">{dlc.description}</p>}
+                    </div>
+                    <div className="dlc-price">
+                      {dlc?.price && <span className="dlc-price-value">{Number(dlc.price).toFixed(2)}€</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="game-detail-purchase">
             <div className="game-detail-price-wrap">
               {discount > 0 && (
@@ -151,8 +216,13 @@ export default function GameDetail({ gameId, game, onBack, user, onAddToCart, ca
               <span className="game-detail-price-current">{discountedPrice}€</span>
               {discount > 0 && <span className="game-detail-discount-badge">-{discount}%</span>}
             </div>
-            <button className="btn-buy" type="button" onClick={handleAddToCart} disabled={alreadyOwned || alreadyInCart}>
-              {alreadyOwned ? 'Уже в библиотеке' : alreadyInCart ? 'В корзине' : 'Добавить в корзину'}
+            <button
+              className="btn-buy"
+              type="button"
+              onClick={alreadyOwned ? handleGoToLibrary : handleAddToCart}
+              disabled={alreadyInCart}
+            >
+              {alreadyOwned ? 'Перейти в библиотеку' : alreadyInCart ? 'В корзине' : 'Добавить в корзину'}
             </button>
             <button className="btn-wishlist" type="button" onClick={handleWishListToggle}>
               {inWishList ? '❤️ В списке желаемого' : '🤍 В список желаемого'}

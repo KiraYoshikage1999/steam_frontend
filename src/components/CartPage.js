@@ -1,5 +1,5 @@
 import React from 'react';
-import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { resolveAssetUrl, resolveGameAssetPath } from '../utils/resolveAssetUrl';
 
 export default function CartPage({ cartItems, user, onBack, onRemove, onCheckout, checkoutStatus, checkoutProcessing }) {
   const totalPrice = cartItems.reduce((sum, item) => sum + Number(item?.price ?? item?.Price ?? 0), 0);
@@ -17,7 +17,7 @@ export default function CartPage({ cartItems, user, onBack, onRemove, onCheckout
               <div className="cart-items">
                 {cartItems.map((game) => {
                   const gameId = game?.id || game?.Id;
-                  const posterUrl = resolveAssetUrl(game?.poster?.url || game?.poster?.Url || game?.images?.[0]?.url || game?.images?.[0]?.Url || '');
+                  const posterUrl = resolveAssetUrl(resolveGameAssetPath(game));
                   const price = Number(game?.price ?? game?.Price ?? 0).toFixed(2);
                   return (
                     <div key={gameId || game?.name || Math.random()} className="cart-item">

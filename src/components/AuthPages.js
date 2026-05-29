@@ -234,6 +234,7 @@ function ProfilePage({ user, onLogout, onBack, onUserChange }) {
     ? [
         { id: 'changes', label: 'Изменения' },
         { id: 'transactions', label: 'Транзакции' },
+        { id: 'security', label: 'Безопасность' },
         { id: 'developer', label: 'Режим разработчика' },
       ]
     : [
@@ -250,6 +251,8 @@ function ProfilePage({ user, onLogout, onBack, onUserChange }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [devMode, setDevMode] = useState(() => localStorage.getItem('steam-frontend.devMode') === 'true');
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     setEditUserName(safeUser?.UserName || safeUser?.username || '');
@@ -317,6 +320,30 @@ function ProfilePage({ user, onLogout, onBack, onUserChange }) {
     const next = !devMode;
     setDevMode(next);
     localStorage.setItem('steam-frontend.devMode', String(next));
+  };
+
+  const handleLogoutClick = async () => {
+    setError('');
+    try {
+      await authMethods.logout(safeUser?.refreshToken || safeUser?.RefreshToken);
+      onLogout?.();
+      onBack?.();
+    } catch (e) {
+      setError(e?.message || 'Не удалось выйти');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setError('');
+    setDeleting(true);
+    try {
+      await authMethods.deleteAccount();
+      onUserChange?.(null);
+      onBack?.();
+    } catch (e) {
+      setError(e?.message || 'Не удалось удалить аккаунт');
+      setDeleting(false);
+    }
   };
 
   const renderAccountSection = () => {
@@ -448,6 +475,70 @@ function ProfilePage({ user, onLogout, onBack, onUserChange }) {
     </div>
   );
 
+  const renderSecuritySection = () => {
+    if (!safeUser) {
+      return (
+        <div className="profile-empty">
+          <p>Чтобы управлять безопасностью аккаунта, войдите в систему.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="profile-section">
+        <div className="form-group">
+          <label>Выход из аккаунта</label>
+          <button
+            type="button"
+            className="btn-submit secondary"
+            onClick={handleLogoutClick}
+          >
+            Выход
+          </button>
+          <p className="profile-help-text">Вы выйдете из своего аккаунта на этом устройстве.</p>
+        </div>
+
+        <hr className="profile-divider" />
+
+        <div className="form-group">
+          <label>Удалить аккаунт</label>
+          {!confirmDelete ? (
+            <button
+              type="button"
+              className="btn-submit danger"
+              onClick={() => setConfirmDelete(true)}
+            >
+              Удалить аккаунт
+            </button>
+          ) : (
+            <div className="delete-confirm">
+              <p className="delete-warning">⚠️ Это действие нельзя отменить! Все данные будут удалены.</p>
+              <div className="delete-confirm-buttons">
+                <button
+                  type="button"
+                  className="btn-submit danger"
+                  onClick={handleDeleteAccount}
+                  disabled={deleting}
+                >
+                  {deleting ? 'Удаление...' : 'Подтвердить удаление'}
+                </button>
+                <button
+                  type="button"
+                  className="btn-submit secondary"
+                  onClick={() => setConfirmDelete(false)}
+                  disabled={deleting}
+                >
+                  Отмена
+                </button>
+              </div>
+            </div>
+          )}
+          {error && <div className="auth-error">{error}</div>}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="auth-page profile-page">
       <button onClick={onBack} className="btn-back">← Назад</button>
@@ -471,6 +562,8 @@ function ProfilePage({ user, onLogout, onBack, onUserChange }) {
             ? renderAccountSection()
             : selectedSection === 'transactions'
             ? renderTransactionsSection()
+            : selectedSection === 'security'
+            ? renderSecuritySection()
             : renderDeveloperSection()}
         </section>
       </div>

@@ -3,6 +3,7 @@ import CreateGameCard from '../Functional/Games/CreateGameCard';
 import { removeFromWishList } from '../Functional/WishList/WishListService';
 
 const API_BASE = 'https://localhost:7219';
+// const API_BASE = 'https://26.185.217.20:7219';
 
 export default function WishListPage({ user, onBack, onGameClick }) {
   const [lists, setLists] = useState([]);
