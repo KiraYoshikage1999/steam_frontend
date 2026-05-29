@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-const API_BASE = 'https://localhost:7219';
 //const API_BASE = 'https://26.185.217.20:7219';
+const API_BASE = 'https://localhost:7219';
 
 export default function GenresFilter({ onGenreSelect, selectedGenres = [] }) {
   const [genres, setGenres] = useState([]);
@@ -10,9 +10,16 @@ export default function GenresFilter({ onGenreSelect, selectedGenres = [] }) {
   useEffect(() => {
     const fetchGenres = async () => {
       try {
-        const response = await fetch(`${API_BASE}/api/Genre/get-all`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        const url = `${API_BASE}/api/Genres/get-all`;
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+
+        if (!response || !response.ok) {
+          throw new Error(`HTTP error! status: ${response?.status ?? 'unknown'}`);
         }
 
         const data = await response.json();

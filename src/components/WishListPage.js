@@ -1,67 +1,74 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CreateGameCard from '../Functional/Games/CreateGameCard';
-import { removeFromWishList } from '../Functional/WishList/WishListService';
-
-const API_BASE = 'https://localhost:7219';
-// const API_BASE = 'https://26.185.217.20:7219';
+import { getWishList, removeFromWishList } from '../Functional/WishList/WishListService';
 
 export default function WishListPage({ user, onBack, onGameClick }) {
-  const [lists, setLists] = useState([]);
+  const [wishList, setWishList] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [removing, setRemoving] = useState(false);
 
+  const getUserId = (userObj) =>
+    userObj?.id || userObj?.userId || userObj?.Id || userObj?.UserId ||
+    userObj?.user?.id || userObj?.user?.userId || userObj?.user?.Id || userObj?.user?.UserId ||
+    null;
+
   useEffect(() => {
     let cancelled = false;
+    const userId = getUserId(user);
+    if (!userId) {
+      setWishList(null);
+      setLoading(false);
+      return;
+    }
+
     (async () => {
       setLoading(true);
       setError('');
       try {
-        const resp = await fetch(`${API_BASE}/api/WishList/get-all`);
-        const json = await resp.json().catch(() => null);
-        if (!resp.ok) {
-          const msg = (json && (json.message || json.title || json.error)) || `HTTP ${resp.status}`;
-          throw new Error(msg);
+        const response = await getWishList(userId);
+        const data = response?.data ?? response ?? null;
+        if (!cancelled) {
+          setWishList(data);
         }
-        const data = Array.isArray(json) ? json : json?.data || json?.Data || [];
-        if (!cancelled) setLists(data);
       } catch (e) {
-        if (!cancelled) setError(e?.message || 'Не удалось загрузить список желаемого');
+        if (!cancelled) {
+          setError(e?.message || 'Не удалось загрузить список желаемого');
+        }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     })();
+
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [user]);
 
-  const userId = user?.Id || user?.id || null;
-  const myList = useMemo(() => {
-    if (!userId) return null;
-    return lists.find((l) => (l.userId || l.UserId) === userId) || null;
-  }, [lists, userId]);
-
-  const wishGames = myList?.wishGames || myList?.WishGames || [];
+  const userId = getUserId(user);
+  const wishGames = wishList?.wishGames || wishList?.WishGames || [];
 
   const handleRemoveGame = async (gameId) => {
     if (!userId) return;
     setRemoving(true);
     try {
-      await removeFromWishList(userId, gameId);
-      setLists((prev) =>
-        prev.map((l) => {
-          if ((l.userId || l.UserId) === userId) {
-            const updatedWishes = Array.isArray(l.wishGames)
-              ? l.wishGames.filter((g) => (g.id || g.Id) !== gameId)
-              : Array.isArray(l.WishGames)
-              ? l.WishGames.filter((g) => (g.id || g.Id) !== gameId)
-              : [];
-            return { ...l, wishGames: updatedWishes, WishGames: updatedWishes };
-          }
-          return l;
-        })
-      );
+      const updated = await removeFromWishList(userId, gameId);
+      const updatedList = updated?.data ?? updated ?? wishList;
+      if (updatedList) {
+        setWishList(updatedList);
+      } else {
+        setWishList((prev) => ({
+          ...prev,
+          wishGames: Array.isArray(wishGames)
+            ? wishGames.filter((g) => (g.id || g.Id) !== gameId)
+            : wishGames,
+          WishGames: Array.isArray(wishGames)
+            ? wishGames.filter((g) => (g.id || g.Id) !== gameId)
+            : wishGames,
+        }));
+      }
     } catch (e) {
       console.error('Error removing from wishlist:', e);
     } finally {

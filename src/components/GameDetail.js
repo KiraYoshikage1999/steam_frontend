@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { resolveAssetUrl, resolveGameAssetPath } from '../utils/resolveAssetUrl';
 import { addToWishList, removeFromWishList } from '../Functional/WishList/WishListService';
 
-const API_BASE = 'https://26.185.217.20:7219';
+const API_BASE = 'https://localhost:7219';
 
 export default function GameDetail({ gameId, game, onBack, user, onAddToCart, cartItems, wishListGames, onWishListUpdate, onGoToLibrary }) {
   const [statusMessage, setStatusMessage] = useState('');
@@ -132,7 +132,7 @@ export default function GameDetail({ gameId, game, onBack, user, onAddToCart, ca
         await removeFromWishList(userId, gameIdentifier);
         setStatusMessage('Удалено из списка желаемого.');
       } else {
-        await addToWishList(userId, gameIdentifier);
+        await addToWishList(userId, game);
         setStatusMessage('Добавлено в список желаемого.');
       }
       if (onWishListUpdate) {

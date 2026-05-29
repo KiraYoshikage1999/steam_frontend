@@ -6,6 +6,7 @@ import AuthPages from './AuthPages';
 import CartPage from './CartPage';
 import Footer from './Footer';
 import { authMethods } from '../Functional/Auth/authMethods';
+import { getWishList } from '../Functional/WishList/WishListService';
 import LibraryPage from './LibraryPage';
 import WishListPage from './WishListPage';
 import { createOrder, createOrderItem } from '../Functional/Order/OrderService';
@@ -191,16 +192,11 @@ export default function SteamPage() {
     let cancelled = false;
     (async () => {
       try {
-        // const resp = await fetch(`https://localhost:7219/api/WishList/get-all`);
-        const resp = await fetch(`https://26.185.217.20:7219/api/WishList/get-all`);
-        const json = await resp.json().catch(() => null);
-        if (resp.ok) {
-          const data = Array.isArray(json) ? json : json?.data || json?.Data || [];
-          const myList = data.find((l) => (l.userId || l.UserId) === userId) || null;
-          const games = myList?.wishGames || myList?.WishGames || [];
-          if (!cancelled) {
-            setWishListGames(games);
-          }
+        const response = await getWishList(userId);
+        const wishlist = response?.data ?? response ?? null;
+        const games = wishlist?.wishGames || wishlist?.WishGames || [];
+        if (!cancelled) {
+          setWishListGames(Array.isArray(games) ? games : []);
         }
       } catch (e) {
         console.warn('Failed to update wishlist:', e);
